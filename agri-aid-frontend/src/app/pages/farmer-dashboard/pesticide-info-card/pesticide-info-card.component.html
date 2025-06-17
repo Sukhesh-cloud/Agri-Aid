@@ -1,0 +1,195 @@
+<div class="pesticide-scanner-container">
+  <div class="header-section">
+    <h1 class="main-title">
+      <i class="fas fa-flask"></i>
+      Pesticide Label Scanner
+    </h1>
+    <p class="subtitle">Upload a pesticide label image to get detailed information and usage instructions</p>
+  </div>
+
+  <!-- Language Selection -->
+  <div class="language-section">
+    <h3 class="section-title">
+      <i class="fas fa-globe"></i>
+      Select Language
+    </h3>
+    <div class="language-grid">
+      <div class="language-option" 
+           *ngFor="let lang of languages"
+           [class.active]="language === lang.code"
+           (click)="language = lang.code">
+        <span class="language-flag">{{ lang.flag }}</span>
+        <span class="language-name">{{ lang.name }}</span>
+        <i class="fas fa-check language-check" *ngIf="language === lang.code"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- Upload Section -->
+  <div class="upload-section">
+    <h3 class="section-title">
+      <i class="fas fa-camera"></i>
+      Upload Pesticide Label
+    </h3>
+    
+    <div class="upload-area" 
+         [class.drag-over]="isDragOver"
+         [class.has-image]="selectedImage"
+         (dragover)="onDragOver($event)"
+         (dragleave)="onDragLeave($event)"
+         (drop)="onDrop($event)">
+      
+      <!-- File Input -->
+      <input type="file" 
+             id="fileInput" 
+             (change)="onFileSelected($event)" 
+             accept="image/*" 
+             class="file-input"
+             #fileInput />
+
+      <!-- Upload Content -->
+      <div class="upload-content" *ngIf="!selectedImage">
+        <div class="upload-icon">
+          <i class="fas fa-cloud-upload-alt"></i>
+        </div>
+        <h4>Drop pesticide label image here</h4>
+        <p>or <button type="button" class="btn-link" (click)="fileInput.click()">browse files</button></p>
+        <small>Supports: JPG, PNG, GIF • Clear label images work best</small>
+      </div>
+
+      <!-- Image Preview -->
+      <div class="image-preview-container" *ngIf="selectedImage && imagePreview">
+        <div class="image-preview">
+          <img [src]="imagePreview" alt="Pesticide label" />
+          <div class="image-overlay">
+            <button type="button" class="btn-remove" (click)="clearSelection()">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        </div>
+        <div class="image-info">
+          <p class="image-name">{{ selectedImage.name }}</p>
+          <p class="image-size">{{ (selectedImage.size / 1024 / 1024).toFixed(2) }} MB</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Error Message -->
+    <div class="alert alert-danger" *ngIf="error">
+      <i class="fas fa-exclamation-triangle"></i>
+      {{ error }}
+    </div>
+  </div>
+
+  <!-- Action Section -->
+  <div class="action-section">
+    <button class="btn btn-primary btn-scan" 
+            (click)="onSubmit()" 
+            [disabled]="!selectedImage || loading">
+      <span *ngIf="!loading">
+        <i class="fas fa-search"></i>
+        Scan Label
+      </span>
+      <span *ngIf="loading">
+        <i class="fas fa-spinner fa-spin"></i>
+        Scanning...
+      </span>
+    </button>
+
+    <button class="btn btn-secondary" 
+            (click)="clearSelection()" 
+            *ngIf="selectedImage && !loading">
+      <i class="fas fa-redo"></i>
+      Select Another
+    </button>
+  </div>
+
+  <!-- Loading Progress -->
+  <div class="loading-section" *ngIf="loading">
+    <div class="progress-container">
+      <div class="progress-bar">
+        <div class="progress-fill"></div>
+      </div>
+      <p class="loading-text">Analyzing pesticide label with OCR...</p>
+    </div>
+  </div>
+
+  <!-- Results Section -->
+  <div class="results-section" *ngIf="result && !loading">
+    <div class="result-card">
+      <div class="result-header">
+        <h3>
+          <i class="fas fa-info-circle"></i>
+          Pesticide Information
+        </h3>
+        <div class="language-badge">
+          <span class="flag">{{ getSelectedLanguage().flag }}</span>
+          <span class="name">{{ getSelectedLanguage().name }}</span>
+        </div>
+      </div>
+      
+      <div class="result-content">
+        <!-- Pesticide Name -->
+        <div class="pesticide-name-section">
+          <div class="pesticide-name">
+            <h4>{{ result.pesticide }}</h4>
+            <div class="safety-badge" [ngClass]="'badge-' + getSafetyLevel(result.pesticide).color">
+              <i class="fas" [ngClass]="'fa-' + getSafetyLevel(result.pesticide).icon"></i>
+              <span>{{ getSafetyLevel(result.pesticide).level }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Usage Instructions -->
+        <div class="usage-section">
+          <h5>
+            <i class="fas fa-clipboard-list"></i>
+            Usage Instructions
+          </h5>
+          <div class="usage-content">
+            <p>{{ result.usage }}</p>
+          </div>
+        </div>
+
+        <!-- Additional Information -->
+        <div class="info-grid" *ngIf="result.additionalInfo">
+          <div class="info-item" *ngFor="let item of result.additionalInfo">
+            <div class="info-label">{{ item.label }}</div>
+            <div class="info-value">{{ item.value }}</div>
+          </div>
+        </div>
+
+        <!-- Safety Warnings -->
+        <div class="warning-section" *ngIf="getSafetyLevel(result.pesticide).level !== 'Low Risk'">
+          <div class="warning-header">
+            <i class="fas fa-exclamation-triangle"></i>
+            <h5>Safety Precautions</h5>
+          </div>
+          <ul class="warning-list">
+            <li>Always wear protective equipment when handling</li>
+            <li>Keep away from children and pets</li>
+            <li>Follow dosage instructions carefully</li>
+            <li>Store in a cool, dry place</li>
+            <li>Dispose of empty containers properly</li>
+          </ul>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="result-actions">
+          <button class="btn btn-outline-primary">
+            <i class="fas fa-download"></i>
+            Download Info
+          </button>
+          <button class="btn btn-outline-success">
+            <i class="fas fa-share-alt"></i>
+            Share Results
+          </button>
+          <button class="btn btn-outline-info">
+            <i class="fas fa-phone"></i>
+            Contact Expert
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

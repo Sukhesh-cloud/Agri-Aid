@@ -1,0 +1,133 @@
+<div class="disease-detection-container">
+  <div class="header-section">
+    <h1 class="main-title">
+      <i class="fas fa-microscope"></i>
+      Plant Disease Detection
+    </h1>
+    <p class="subtitle">Upload an image of a plant leaf to detect potential diseases</p>
+  </div>
+
+  <!-- Upload Section -->
+  <div class="upload-section">
+    <div class="upload-area" 
+         [class.drag-over]="isDragOver"
+         [class.has-image]="selectedImage"
+         (dragover)="onDragOver($event)"
+         (dragleave)="onDragLeave($event)"
+         (drop)="onDrop($event)">
+      
+      <!-- File Input -->
+      <input type="file" 
+             id="fileInput" 
+             (change)="onFileChange($event)" 
+             accept="image/*" 
+             class="file-input"
+             #fileInput />
+
+      <!-- Upload Content -->
+      <div class="upload-content" *ngIf="!selectedImage">
+        <div class="upload-icon">
+          <i class="fas fa-cloud-upload-alt"></i>
+        </div>
+        <h3>Drop your image here</h3>
+        <p>or <button type="button" class="btn-link" (click)="fileInput.click()">browse files</button></p>
+        <small>Supports: JPG, PNG, GIF (Max 10MB)</small>
+      </div>
+
+      <!-- Image Preview -->
+      <div class="image-preview-container" *ngIf="selectedImage && imagePreview">
+        <div class="image-preview">
+          <img [src]="imagePreview" alt="Selected image" />
+          <div class="image-overlay">
+            <button type="button" class="btn-remove" (click)="clearSelection()">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        </div>
+        <div class="image-info">
+          <p class="image-name">{{ selectedImage.name }}</p>
+          <p class="image-size">{{ (selectedImage.size / 1024 / 1024).toFixed(2) }} MB</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Error Message -->
+    <div class="alert alert-danger" *ngIf="error">
+      <i class="fas fa-exclamation-triangle"></i>
+      {{ error }}
+    </div>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="action-section">
+    <button class="btn btn-primary btn-analyze" 
+            (click)="submit()" 
+            [disabled]="!selectedImage || isLoading">
+      <span *ngIf="!isLoading">
+        <i class="fas fa-search"></i>
+        Analyze Image
+      </span>
+      <span *ngIf="isLoading">
+        <i class="fas fa-spinner fa-spin"></i>
+        Analyzing...
+      </span>
+    </button>
+
+    <button class="btn btn-secondary" 
+            (click)="clearSelection()" 
+            *ngIf="selectedImage && !isLoading">
+      <i class="fas fa-redo"></i>
+      Select Another
+    </button>
+  </div>
+
+  <!-- Loading Progress -->
+  <div class="loading-section" *ngIf="isLoading">
+    <div class="progress-container">
+      <div class="progress-bar">
+        <div class="progress-fill"></div>
+      </div>
+      <p class="loading-text">Analyzing your image with AI...</p>
+    </div>
+  </div>
+
+  <!-- Results Section -->
+  <div class="results-section" *ngIf="predictionResult && !isLoading">
+    <div class="result-card">
+      <div class="result-header">
+        <h3>
+          <i class="fas fa-chart-line"></i>
+          Analysis Results
+        </h3>
+      </div>
+      
+      <div class="result-content">
+        <div class="main-result">
+          <div class="disease-label">
+            <span class="label-text">{{ predictionResult.label }}</span>
+          </div>
+          
+          <div class="confidence-section">
+            <div class="confidence-badge" [ngClass]="getConfidenceColor(predictionResult.confidence)">
+              <span class="confidence-icon">{{ getConfidenceIcon(predictionResult.confidence) }}</span>
+              <span class="confidence-value">{{ (predictionResult.confidence * 100).toFixed(1) }}% Confidence</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="confidence-bar-container">
+          <div class="confidence-bar">
+            <div class="confidence-fill" 
+                 [style.width.%]="predictionResult.confidence * 100"
+                 [ngClass]="getConfidenceColor(predictionResult.confidence)">
+            </div>
+          </div>
+        </div>
+
+        <div class="result-actions">
+    
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

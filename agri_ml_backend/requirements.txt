@@ -1,0 +1,11 @@
+Flask
+tensorflow
+pillow
+numpy
+scikit-learn
+opencv-python
+pytesseract
+spacy
+transformers
+joblib
+python-dotenv

@@ -1,0 +1,348 @@
+<div class="container py-4">
+  <!-- Header Section -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="text-success mb-0">
+      <i class="fas fa-cloud-sun me-2"></i>
+      7-Day Weather Forecast - {{ location }}
+    </h3>
+    
+    <!-- Unit Toggle Buttons -->
+    <div class="btn-group" role="group">
+      <button 
+        type="button" 
+        class="btn btn-outline-primary btn-sm"
+        [class.active]="temperatureUnit === 'celsius'"
+        (click)="toggleTemperatureUnit()">
+        °C
+      </button>
+      <button 
+        type="button" 
+        class="btn btn-outline-primary btn-sm"
+        [class.active]="temperatureUnit === 'fahrenheit'"
+        (click)="toggleTemperatureUnit()">
+        °F
+      </button>
+      <button 
+        type="button" 
+        class="btn btn-outline-secondary btn-sm ms-2"
+        [class.active]="windUnit === 'kph'"
+        (click)="toggleWindUnit()">
+        km/h
+      </button>
+      <button 
+        type="button" 
+        class="btn btn-outline-secondary btn-sm"
+        [class.active]="windUnit === 'mph'"
+        (click)="toggleWindUnit()">
+        mph
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;"></div>
+    <h5>Loading forecast...</h5>
+    <p class="text-muted">Getting weather data for {{ location }}</p>
+  </div>
+
+  <!-- Weather Cards -->
+  <div class="row" *ngIf="!loading">
+    <div *ngFor="let day of forecastData; let i = index" class="col-xl-3 col-lg-4 col-md-6 mb-4">
+      <div class="card shadow-sm h-100 weather-card" 
+           [class.border-primary]="i === 0"
+           (click)="selectDay(day)"
+           style="cursor: pointer;">
+        
+        <!-- Card Header -->
+        <div class="card-header text-center" [class.bg-primary]="i === 0" [class.text-white]="i === 0">
+          <h6 class="mb-0">
+            <span *ngIf="i === 0" class="badge bg-warning text-dark me-2">Today</span>
+            {{ formatDate(day.date) }}
+          </h6>
+        </div>
+
+        <div class="card-body text-center">
+          <!-- Weather Icon and Condition -->
+          <div class="mb-3">
+            <img [src]="'https:' + day.day.condition.icon" 
+                 alt="{{ day.day.condition.text }}"
+                 class="weather-icon mb-2"
+                 style="width: 64px; height: 64px;">
+            <p class="mb-1 fw-bold">{{ day.day.condition.text }}</p>
+          </div>
+
+          <!-- Temperature Range -->
+          <div class="row mb-3">
+            <div class="col-6">
+              <small class="text-muted d-block">High</small>
+              <strong class="text-danger">
+                {{ getTemperature(day.day.maxtemp_c, day.day.maxtemp_f) }}
+              </strong>
+            </div>
+            <div class="col-6">
+              <small class="text-muted d-block">Low</small>
+              <strong class="text-primary">
+                {{ getTemperature(day.day.mintemp_c, day.day.mintemp_f) }}
+              </strong>
+            </div>
+          </div>
+
+          <!-- Weather Details Grid -->
+          <div class="row g-2 small">
+            <!-- Rain Chance -->
+            <div class="col-6">
+              <div class="d-flex align-items-center">
+                <i class="fas fa-tint text-primary me-1"></i>
+                <span [class]="getRainChanceClass(day.day.daily_chance_of_rain)">
+                  {{ day.day.daily_chance_of_rain }}%
+                </span>
+              </div>
+              <small class="text-muted">Rain</small>
+            </div>
+
+            <!-- Humidity -->
+            <div class="col-6">
+              <div class="d-flex align-items-center">
+                <i class="fas fa-water me-1"></i>
+                <span [class]="getHumidityClass(day.day.avghumidity)">
+                  {{ day.day.avghumidity }}%
+                </span>
+              </div>
+              <small class="text-muted">Humidity</small>
+            </div>
+
+            <!-- Wind Speed -->
+            <div class="col-6">
+              <div class="d-flex align-items-center">
+                <i class="fas fa-wind me-1"></i>
+                <span>{{ getWindSpeed(day.day.maxwind_kph, day.day.maxwind_mph) }}</span>
+              </div>
+              <small class="text-muted">Wind</small>
+            </div>
+
+            <!-- UV Index -->
+            <div class="col-6">
+              <div class="d-flex align-items-center">
+                <i class="fas fa-sun me-1"></i>
+                <span [class]="getUVIndexClass(day.day.uv)">
+                  {{ day.day.uv }} {{ getUVIndex(day.day.uv) }}
+                </span>
+              </div>
+              <small class="text-muted">UV</small>
+            </div>
+
+            <!-- Visibility -->
+            <div class="col-6">
+              <div class="d-flex align-items-center">
+                <i class="fas fa-eye me-1"></i>
+                <span>{{ day.day.avgvis_km }} km</span>
+              </div>
+              <small class="text-muted">Visibility</small>
+            </div>
+
+            <!-- Precipitation -->
+            <div class="col-6">
+              <div class="d-flex align-items-center">
+                <i class="fas fa-cloud-rain me-1"></i>
+                <span>{{ day.day.totalprecip_mm }} mm</span>
+              </div>
+              <small class="text-muted">Precip</small>
+            </div>
+          </div>
+
+          <!-- Snow Information (if applicable) -->
+          <div *ngIf="day.day.totalsnow_cm > 0" class="mt-2 p-2 bg-light rounded">
+            <i class="fas fa-snowflake text-info me-1"></i>
+            <span class="small">Snow: {{ day.day.totalsnow_cm }} cm</span>
+          </div>
+
+          <!-- Astronomy Info -->
+          <div class="mt-3 pt-2 border-top">
+            <div class="row small text-muted">
+              <div class="col-6">
+                <i class="fas fa-sun text-warning me-1"></i>
+                {{ day.astro.sunrise }}
+              </div>
+              <div class="col-6">
+                <i class="fas fa-moon text-secondary me-1"></i>
+                {{ day.astro.sunset }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card Footer -->
+        <div class="card-footer text-center small text-muted">
+          <i class="fas fa-info-circle me-1"></i>
+          Click for hourly details
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hourly Forecast Modal -->
+  <div *ngIf="showHourlyForecast && selectedDay" 
+       class="modal fade show d-block" 
+       style="background-color: rgba(0,0,0,0.5);">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <i class="fas fa-clock me-2"></i>
+            Hourly Forecast - {{ formatDate(selectedDay.date) }}
+          </h5>
+          <button type="button" class="btn-close" (click)="closeHourlyForecast()"></button>
+        </div>
+        
+        <div class="modal-body">
+          <!-- Astronomy Information -->
+          <div class="row mb-4">
+            <div class="col-md-3">
+              <div class="card bg-light">
+                <div class="card-body text-center py-2">
+                  <i class="fas fa-sun text-warning"></i>
+                  <div class="small">Sunrise</div>
+                  <strong>{{ selectedDay.astro.sunrise }}</strong>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card bg-light">
+                <div class="card-body text-center py-2">
+                  <i class="fas fa-sun text-orange"></i>
+                  <div class="small">Sunset</div>
+                  <strong>{{ selectedDay.astro.sunset }}</strong>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card bg-light">
+                <div class="card-body text-center py-2">
+                  <i class="fas fa-moon text-secondary"></i>
+                  <div class="small">Moon Phase</div>
+                  <strong>{{ selectedDay.astro.moon_phase }}</strong>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card bg-light">
+                <div class="card-body text-center py-2">
+                  <i class="fas fa-circle text-info"></i>
+                  <div class="small">Moon Illumination</div>
+                  <strong>{{ selectedDay.astro.moon_illumination }}%</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Hourly Forecast -->
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead class="table-dark">
+                <tr>
+                  <th>Time</th>
+                  <th>Condition</th>
+                  <th>Temp</th>
+                  <th>Feels Like</th>
+                  <th>Rain</th>
+                  <th>Wind</th>
+                  <th>Humidity</th>
+                  <th>UV</th>
+                  <th>Pressure</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let hour of selectedDay.hour; let i = index" 
+                    [class.table-warning]="i % 6 === 0">
+                  <td>
+                    <strong>{{ formatTime(hour.time) }}</strong>
+                  </td>
+                  <td>
+                    <img [src]="'https:' + hour.condition.icon" 
+                         alt="{{ hour.condition.text }}"
+                         style="width: 32px; height: 32px;"
+                         class="me-2">
+                    <span class="small">{{ hour.condition.text }}</span>
+                  </td>
+                  <td>
+                    <strong>{{ getTemperature(hour.temp_c, hour.temp_f) }}</strong>
+                  </td>
+                  <td>
+                    <span class="text-muted">
+                      {{ getTemperature(hour.feelslike_c, hour.feelslike_f) }}
+                    </span>
+                  </td>
+                  <td>
+                    <span [class]="getRainChanceClass(hour.chance_of_rain)">
+                      {{ hour.chance_of_rain }}%
+                    </span>
+                    <div class="small text-muted">
+                      {{ hour.precip_mm }}mm
+                    </div>
+                  </td>
+                  <td>
+                    <div>{{ getWindSpeed(hour.wind_kph, hour.wind_mph) }}</div>
+                    <small class="text-muted">{{ hour.wind_dir }}</small>
+                  </td>
+                  <td>
+                    <span [class]="getHumidityClass(hour.humidity)">
+                      {{ hour.humidity }}%
+                    </span>
+                  </td>
+                  <td>
+                    <span [class]="getUVIndexClass(hour.uv)">
+                      {{ hour.uv }}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="small">{{ hour.pressure_mb }} mb</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Custom CSS (add to component styles) -->
+<style>
+.weather-card {
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.weather-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
+}
+
+.weather-icon {
+  filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.1));
+}
+
+.text-orange {
+  color: #fd7e14 !important;
+}
+
+.text-purple {
+  color: #6f42c1 !important;
+}
+
+.modal.show {
+  display: block !important;
+}
+
+@media (max-width: 768px) {
+  .modal-dialog {
+    margin: 10px;
+    max-width: calc(100% - 20px);
+  }
+  
+  .table-responsive {
+    font-size: 0.875rem;
+  }
+}
+</style>

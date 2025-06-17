@@ -1,0 +1,181 @@
+<!-- market-prices.component.html -->
+<div class="market-prices-container">
+  <!-- Header Section -->
+  <div class="header-section">
+    <div class="title-group">
+      <h2 class="main-title">
+        <i class="fas fa-chart-line me-2"></i>
+        Real-time Market Prices
+      </h2>
+      <p class="subtitle">Live commodity prices and market trends</p>
+    </div>
+    
+    <div class="header-actions">
+      <button class="btn btn-outline-primary me-2" (click)="refresh()" [disabled]="loading">
+        <i class="fas fa-sync-alt" [class.fa-spin]="loading"></i>
+        <span class="d-none d-sm-inline ms-1">Refresh</span>
+      </button>
+      
+      <button class="btn btn-outline-secondary" (click)="toggleViewMode()">
+        <i [class]="viewMode === 'table' ? 'fas fa-th-large' : 'fas fa-table'"></i>
+        <span class="d-none d-sm-inline ms-1">
+          {{ viewMode === 'table' ? 'Cards' : 'Table' }}
+        </span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Filters Section -->
+  <div class="filters-section" *ngIf="!loading && !error">
+    <div class="search-box">
+      <div class="input-group">
+        <span class="input-group-text">
+          <i class="fas fa-search"></i>
+        </span>
+        <input 
+          type="text" 
+          class="form-control" 
+          placeholder="Search crops..." 
+          [(ngModel)]="searchTerm"
+        >
+      </div>
+    </div>
+    
+    <div class="results-info">
+      <small class="text-muted">
+        Showing {{ filteredPrices.length }} of {{ prices.length }} items
+      </small>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-section" *ngIf="loading">
+    <div class="loading-spinner">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <p class="loading-text">Loading market prices...</p>
+    </div>
+  </div>
+
+  <!-- Error State -->
+  <div class="error-section" *ngIf="error && !loading">
+    <div class="alert alert-danger d-flex align-items-center">
+      <i class="fas fa-exclamation-triangle me-3"></i>
+      <div>
+        <strong>Error!</strong> {{ errorMessage }}
+        <button class="btn btn-sm btn-outline-danger ms-3" (click)="refresh()">
+          Try Again
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table View -->
+  <div class="table-section" *ngIf="!loading && !error && viewMode === 'table'">
+    <div class="table-responsive" *ngIf="filteredPrices.length > 0">
+      <table class="table table-hover modern-table">
+        <thead>
+          <tr>
+            <th (click)="sortData('crop')" class="sortable">
+              Crop
+              <i [class]="getSortIcon('crop')" class="ms-1"></i>
+            </th>
+            <th (click)="sortData('price')" class="sortable text-end">
+              Price
+              <i [class]="getSortIcon('price')" class="ms-1"></i>
+            </th>
+            <th>Unit</th>
+            <th>Trend</th>
+            <th class="d-none d-md-table-cell">Market</th>
+            <th class="d-none d-lg-table-cell">Last Updated</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of filteredPrices; trackBy: trackByFn" class="table-row">
+            <td>
+              <div class="crop-info">
+                <strong>{{ item.crop }}</strong>
+              </div>
+            </td>
+            <td class="text-end">
+              <div class="price-info">
+                <span class="price-value">₹{{ item.price | number:'1.2-2' }}</span>
+                <small class="text-muted d-block" *ngIf="item.changePercent">
+                  {{ item.changePercent > 0 ? '+' : '' }}{{ item.changePercent }}%
+                </small>
+              </div>
+            </td>
+            <td>
+              <span class="badge bg-light text-dark">{{ item.unit }}</span>
+            </td>
+            <td>
+              <div class="trend-indicator" [class]="getTrendClass(item.trend)">
+                <i [class]="getTrendIcon(item.trend)" class="trend-icon"></i>
+                <span class="trend-text text-capitalize ms-1">{{ item.trend }}</span>
+              </div>
+            </td>
+            <td class="d-none d-md-table-cell">
+              <small class="text-muted">{{ item.market || 'N/A' }}</small>
+            </td>
+            <td class="d-none d-lg-table-cell">
+              <small class="text-muted">
+                {{ item.lastUpdated ? (item.lastUpdated | date:'short') : 'N/A' }}
+              </small>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Cards View -->
+  <div class="cards-section" *ngIf="!loading && !error && viewMode === 'cards'">
+    <div class="row g-3" *ngIf="filteredPrices.length > 0">
+      <div class="col-12 col-sm-6 col-md-4 col-lg-3" *ngFor="let item of filteredPrices; trackBy: trackByFn">
+        <div class="price-card">
+          <div class="card-header">
+            <h6 class="crop-name">{{ item.crop }}</h6>
+            <div class="trend-indicator" [class]="getTrendClass(item.trend)">
+              <i [class]="getTrendIcon(item.trend)" class="trend-icon"></i>
+            </div>
+          </div>
+          
+          <div class="card-body">
+            <div class="price-display">
+              <span class="price-value">₹{{ item.price | number:'1.2-2' }}</span>
+              <span class="price-unit">/ {{ item.unit }}</span>
+            </div>
+            
+            <div class="change-info" *ngIf="item.changePercent">
+              <small [class]="item.changePercent >= 0 ? 'text-success' : 'text-danger'">
+                {{ item.changePercent > 0 ? '+' : '' }}{{ item.changePercent }}%
+              </small>
+            </div>
+          </div>
+          
+          <div class="card-footer" *ngIf="item.market || item.lastUpdated">
+            <small class="text-muted">
+              <div *ngIf="item.market">{{ item.market }}</div>
+              <div *ngIf="item.lastUpdated">{{ item.lastUpdated | date:'short' }}</div>
+            </small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-section" *ngIf="!loading && !error && filteredPrices.length === 0">
+    <div class="empty-state">
+      <i class="fas fa-search fa-3x text-muted mb-3"></i>
+      <h5>No Results Found</h5>
+      <p class="text-muted">
+        {{ searchTerm ? 'No crops match your search criteria.' : 'No market price data available.' }}
+      </p>
+      <button class="btn btn-primary" (click)="searchTerm = ''" *ngIf="searchTerm">
+        Clear Search
+      </button>
+    </div>
+  </div>
+</div>

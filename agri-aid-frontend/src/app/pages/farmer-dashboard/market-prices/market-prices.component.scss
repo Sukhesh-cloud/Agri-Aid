@@ -1,0 +1,435 @@
+// market-prices.component.scss
+.market-prices-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem;
+
+  // Header Section
+  .header-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #e9ecef;
+
+    .title-group {
+      .main-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+
+        i {
+          color: #3498db;
+        }
+      }
+
+      .subtitle {
+        color: #6c757d;
+        margin-bottom: 0;
+        font-size: 1.1rem;
+      }
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 0.5rem;
+
+      .btn {
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+
+        &:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+      }
+    }
+  }
+
+  // Filters Section
+  .filters-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 12px;
+
+    .search-box {
+      flex: 1;
+      max-width: 400px;
+
+      .input-group {
+        .input-group-text {
+          background: white;
+          border-right: none;
+          color: #6c757d;
+        }
+
+        .form-control {
+          border-left: none;
+          border-radius: 0 8px 8px 0;
+          
+          &:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.25);
+          }
+        }
+      }
+    }
+
+    .results-info {
+      margin-left: 1rem;
+    }
+  }
+
+  // Loading Section
+  .loading-section {
+    text-align: center;
+    padding: 4rem 2rem;
+
+    .loading-spinner {
+      .spinner-border {
+        width: 3rem;
+        height: 3rem;
+        margin-bottom: 1rem;
+      }
+
+      .loading-text {
+        font-size: 1.1rem;
+        color: #6c757d;
+        margin: 0;
+      }
+    }
+  }
+
+  // Error Section
+  .error-section {
+    margin: 2rem 0;
+
+    .alert {
+      border-radius: 12px;
+      border: none;
+      box-shadow: 0 4px 12px rgba(220, 53, 69, 0.15);
+    }
+  }
+
+  // Table Section
+  .table-section {
+    .table-responsive {
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .modern-table {
+      margin-bottom: 0;
+      background: white;
+
+      thead {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        
+        th {
+          border: none;
+          color: white;
+          font-weight: 600;
+          padding: 1rem;
+          position: relative;
+
+          &.sortable {
+            cursor: pointer;
+            user-select: none;
+            transition: background-color 0.3s ease;
+
+            &:hover {
+              background-color: rgba(255, 255, 255, 0.1);
+            }
+
+            i {
+              opacity: 0.7;
+              transition: opacity 0.3s ease;
+            }
+
+            &:hover i {
+              opacity: 1;
+            }
+          }
+        }
+      }
+
+      tbody {
+        .table-row {
+          transition: all 0.3s ease;
+          border: none;
+
+          &:hover {
+            background-color: #f8f9fa;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+          }
+
+          td {
+            padding: 1rem;
+            border-top: 1px solid #e9ecef;
+            vertical-align: middle;
+          }
+        }
+      }
+    }
+
+    .crop-info {
+      strong {
+        color: #2c3e50;
+        font-weight: 600;
+      }
+    }
+
+    .price-info {
+      .price-value {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #27ae60;
+      }
+    }
+
+    .trend-indicator {
+      display: flex;
+      align-items: center;
+
+      .trend-icon {
+        width: 16px;
+        margin-right: 0.5rem;
+      }
+
+      &.trend-up {
+        color: #27ae60;
+        .trend-icon {
+          animation: bounce-up 1s ease-in-out infinite alternate;
+        }
+      }
+
+      &.trend-down {
+        color: #e74c3c;
+        .trend-icon {
+          animation: bounce-down 1s ease-in-out infinite alternate;
+        }
+      }
+
+      &.trend-stable {
+        color: #f39c12;
+      }
+    }
+  }
+
+  // Cards Section
+  .cards-section {
+    .price-card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      overflow: hidden;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+
+      &:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+      }
+
+      .card-header {
+        padding: 1rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        .crop-name {
+          margin: 0;
+          font-weight: 600;
+          font-size: 1rem;
+        }
+
+        .trend-indicator {
+          .trend-icon {
+            font-size: 1.2rem;
+          }
+
+          &.trend-up .trend-icon {
+            color: #2ecc71;
+            animation: pulse-up 2s ease-in-out infinite;
+          }
+
+          &.trend-down .trend-icon {
+            color: #ff6b6b;
+            animation: pulse-down 2s ease-in-out infinite;
+          }
+
+          &.trend-stable .trend-icon {
+            color: #ffd93d;
+          }
+        }
+      }
+
+      .card-body {
+        padding: 1.5rem 1rem;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+
+        .price-display {
+          text-align: center;
+          margin-bottom: 0.5rem;
+
+          .price-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #27ae60;
+            display: block;
+          }
+
+          .price-unit {
+            font-size: 0.9rem;
+            color: #6c757d;
+          }
+        }
+
+        .change-info {
+          text-align: center;
+          font-weight: 600;
+        }
+      }
+
+      .card-footer {
+        padding: 0.75rem 1rem;
+        background-color: #f8f9fa;
+        border-top: 1px solid #e9ecef;
+        margin-top: auto;
+
+        small {
+          font-size: 0.8rem;
+          line-height: 1.4;
+        }
+      }
+    }
+  }
+
+  // Empty Section
+  .empty-section {
+    text-align: center;
+    padding: 4rem 2rem;
+
+    .empty-state {
+      max-width: 400px;
+      margin: 0 auto;
+
+      i {
+        margin-bottom: 1rem;
+      }
+
+      h5 {
+        color: #2c3e50;
+        margin-bottom: 1rem;
+      }
+
+      p {
+        margin-bottom: 2rem;
+      }
+
+      .btn {
+        border-radius: 8px;
+        padding: 0.75rem 2rem;
+      }
+    }
+  }
+
+  // Animations
+  @keyframes bounce-up {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-3px); }
+  }
+
+  @keyframes bounce-down {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(3px); }
+  }
+
+  @keyframes pulse-up {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+  }
+
+  @keyframes pulse-down {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+  }
+
+  // Responsive Design
+  @media (max-width: 768px) {
+    padding: 0.5rem;
+
+    .header-section {
+      flex-direction: column;
+      gap: 1rem;
+      text-align: center;
+
+      .title-group .main-title {
+        font-size: 1.5rem;
+      }
+
+      .header-actions {
+        align-self: stretch;
+        justify-content: center;
+      }
+    }
+
+    .filters-section {
+      flex-direction: column;
+      gap: 1rem;
+      text-align: center;
+
+      .search-box {
+        max-width: none;
+      }
+    }
+
+    .table-section .modern-table {
+      font-size: 0.9rem;
+
+      th, td {
+        padding: 0.75rem 0.5rem;
+      }
+    }
+
+    .cards-section .price-card {
+      .card-body .price-display .price-value {
+        font-size: 1.25rem;
+      }
+    }
+  }
+
+  @media (max-width: 576px) {
+    .header-section .title-group .main-title {
+      font-size: 1.25rem;
+      
+      i {
+        display: none;
+      }
+    }
+
+    .cards-section .price-card .card-header {
+      flex-direction: column;
+      gap: 0.5rem;
+      text-align: center;
+    }
+  }
+}

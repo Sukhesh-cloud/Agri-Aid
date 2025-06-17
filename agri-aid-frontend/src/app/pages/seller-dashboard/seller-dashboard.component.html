@@ -1,0 +1,44 @@
+<div class="container mt-4">
+  <h3>Pending Crop Sale Requests</h3>
+
+  <div *ngIf="message" class="alert alert-success">{{ message }}</div>
+  <div *ngIf="loading">Loading crop sales...</div>
+
+  <div *ngIf="!loading && pendingSales.length > 0">
+    <table class="table table-hover table-bordered">
+      <thead class="table-light">
+        <tr>
+          <th>Crop</th>
+          <th>Quantity</th>
+          <th>Price (₹/unit)</th>
+          <th>Farmer</th>
+          <th>Location</th>
+          <th>Posted On</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let sale of pendingSales">
+          <td>{{ sale.cropName }}</td>
+          <td>{{ sale.quantity }}</td>
+          <td>{{ sale.pricePerUnit }}</td>
+          <td>{{ sale.farmerId.name }}</td>
+          <td>{{ sale.farmerId.location }}</td>
+          <td>{{ sale.createdAt | date:'short' }}</td>
+          <td>
+            <button class="btn btn-sm btn-success me-2" (click)="respond(sale._id, 'accepted')">
+              Accept
+            </button>
+            <button class="btn btn-sm btn-danger" (click)="respond(sale._id, 'rejected')">
+              Reject
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div *ngIf="!loading && pendingSales.length === 0" class="alert alert-info">
+    No pending crop requests available.
+  </div>
+</div>

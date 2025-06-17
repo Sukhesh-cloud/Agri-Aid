@@ -1,0 +1,53 @@
+<div class="container mt-4">
+  <h4>Sell Your Crop</h4>
+  <form [formGroup]="saleForm" (ngSubmit)="postCrop()" class="row g-3">
+    <div class="col-md-4">
+      <label class="form-label">Crop Name</label>
+      <input type="text" formControlName="cropName" class="form-control" placeholder="e.g. Tomato">
+    </div>
+    <div class="col-md-3">
+      <label class="form-label">Quantity (kg)</label>
+      <input type="number" formControlName="quantity" class="form-control" placeholder="e.g. 100">
+    </div>
+    <div class="col-md-3">
+      <label class="form-label">Price per Unit (₹)</label>
+      <input type="number" formControlName="pricePerUnit" class="form-control" placeholder="e.g. 20">
+    </div>
+    <div class="col-md-2 align-self-end">
+      <button type="submit" class="btn btn-success w-100" [disabled]="saleForm.invalid">Post</button>
+    </div>
+  </form>
+
+  <div *ngIf="successMessage" class="alert alert-success mt-3">{{ successMessage }}</div>
+  <div *ngIf="error" class="alert alert-danger mt-3">{{ error }}</div>
+
+  <hr class="my-4">
+
+  <h4>Your Crop Sale Status</h4>
+  <div *ngIf="loading">Loading crop sales...</div>
+
+  <table *ngIf="!loading && sales.length" class="table table-bordered table-striped">
+    <thead class="table-light">
+      <tr>
+        <th>Crop</th>
+        <th>Qty (kg)</th>
+        <th>Price (₹)</th>
+        <th>Status</th>
+        <th>Posted On</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let sale of sales">
+        <td>{{ sale.cropName }}</td>
+        <td>{{ sale.quantity }}</td>
+        <td>{{ sale.pricePerUnit }}</td>
+        <td><span [ngClass]="getStatusClass(sale.status)">{{ sale.status | titlecase }}</span></td>
+        <td>{{ sale.createdAt | date:'short' }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div *ngIf="!loading && !sales.length" class="alert alert-info">
+    No crop sales found yet.
+  </div>
+</div>
