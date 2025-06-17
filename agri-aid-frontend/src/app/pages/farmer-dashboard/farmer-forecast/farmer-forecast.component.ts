@@ -117,7 +117,7 @@ export class FarmerForecastComponent implements OnInit {
   }
 
   fetch7DayForecast(location: string) {
-    const apiKey = '0a9e3a37e3ba4b14874140251251606';
+    const apiKey = 'your_api_key';
     const url = `http://api.weatherapi.com/v1/forecast.json?key=${apiKey}&q=${location}&days=7&aqi=yes&alerts=yes`;
     
     this.http.get<any>(url).subscribe({
